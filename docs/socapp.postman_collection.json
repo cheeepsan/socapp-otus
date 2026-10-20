@@ -1,0 +1,1336 @@
+{
+  "info": {
+    "_postman_id": "8f2b5c1e-4a63-4f0d-9f27-6f0c2a7d1b44",
+    "name": "socapp",
+    "description": "REST API collection for the socapp course project (OTUS Highload Architect).\n\nImport this file into Postman, start the app (see docs/run-guide.md), then run the folders in order. Requests save IDs and tokens into collection variables automatically, so most requests work out of the box after you have registered and logged in both users.\n\nUsers in this collection: user A = Ivan Petrov, user B = Maria Ivanova. The collection-level Bearer token is user A's session token ({{token}}); requests that act as user B override it with {{tokenB}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "0. Smoke",
+      "item": [
+        {
+          "name": "Swagger UI is up",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/docs/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "docs/"
+              ]
+            },
+            "description": "Confirms the server is running. The Swagger UI is served at /docs/ (a request to /docs without the trailing slash answers 308 with a redirect to ./docs/)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "1. Register and login",
+      "description": "Creates the two test users and logs both in. The tests save their IDs and tokens into collection variables (userA_id, userB_id, token, tokenB).",
+      "item": [
+        {
+          "name": "Register user A (Ivan Petrov)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set(\"userA_id\", body.user_id);",
+                  "  pm.test(\"response contains user_id\", function () {",
+                  "    pm.expect(body).to.have.property(\"user_id\");",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Ivan\",\n  \"second_name\": \"Petrov\",\n  \"birthdate\": \"1990-01-15\",\n  \"biography\": \"Hiking and Scala\",\n  \"city\": \"Moscow\",\n  \"password\": \"secret-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "register"
+              ]
+            },
+            "description": "Registers a new user. `birthdate`, `biography` and `city` are optional. Returns {\"user_id\": \"...\"}. Blank first_name, second_name or password give 400."
+          },
+          "response": []
+        },
+        {
+          "name": "Register user B (Maria Ivanova)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set(\"userB_id\", body.user_id);",
+                  "  pm.test(\"response contains user_id\", function () {",
+                  "    pm.expect(body).to.have.property(\"user_id\");",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Maria\",\n  \"second_name\": \"Ivanova\",\n  \"birthdate\": \"1992-07-03\",\n  \"biography\": \"Photography\",\n  \"city\": \"Saint-Petersburg\",\n  \"password\": \"secret-2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "register"
+              ]
+            },
+            "description": "Registers the second test user. Returns {\"user_id\": \"...\"}."
+          },
+          "response": []
+        },
+        {
+          "name": "Login as user A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set(\"token\", body.token);",
+                  "  pm.test(\"response contains token\", function () {",
+                  "    pm.expect(body).to.have.property(\"token\");",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{userA_id}}\",\n  \"password\": \"secret-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Authenticates user A. The test script stores the returned token in {{token}}, which the collection uses as the default Bearer token."
+          },
+          "response": []
+        },
+        {
+          "name": "Login as user B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set(\"tokenB\", body.token);",
+                  "  pm.test(\"response contains token\", function () {",
+                  "    pm.expect(body).to.have.property(\"token\");",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{userB_id}}\",\n  \"password\": \"secret-2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Authenticates user B. The test script stores the returned token in {{tokenB}}."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. User profiles",
+      "item": [
+        {
+          "name": "Get user profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test(\"returns the user profile\", function () {",
+                  "    pm.expect(body.first_name).to.eql(\"Ivan\");",
+                  "    pm.expect(body.second_name).to.eql(\"Petrov\");",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/get/{{userA_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "get",
+                "{{userA_id}}"
+              ]
+            },
+            "description": "Public endpoint. Returns {id, first_name, second_name, birthdate, biography, city}. Unknown id gives 404."
+          },
+          "response": []
+        },
+        {
+          "name": "Search users by name prefix",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test(\"returns a list of users\", function () {",
+                  "    pm.expect(body).to.be.an(\"array\");",
+                  "    pm.expect(body.map((u) => u.first_name)).to.include(\"Ivan\");",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/search?first_name=Iva&last_name=Pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "first_name",
+                  "value": "Iva"
+                },
+                {
+                  "key": "last_name",
+                  "value": "Pet"
+                }
+              ]
+            },
+            "description": "Public endpoint. Both query parameters are required and are matched as prefixes (SQL LIKE 'prefix%'). Blank values give 400."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Friends",
+      "item": [
+        {
+          "name": "Add friend (A adds B)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/friend/set/{{userB_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "friend",
+                "set",
+                "{{userB_id}}"
+              ]
+            },
+            "description": "Authenticated (user A). Adds B to A's friend list; adding the same friend twice is a no-op. Empty response body. 400 when the target user does not exist or is the caller; 401 without a valid token.\n\nRequired by \"Feed (posts of friends)\" in the Posts folder."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete friend (A removes B)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/friend/delete/{{userB_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "friend",
+                "delete",
+                "{{userB_id}}"
+              ]
+            },
+            "description": "Authenticated (user A). Removes B from A's friend list. Always succeeds with an empty body once authenticated (removing a non-friend is a no-op).\n\nRun this at the end of the walkthrough if you like — but note the feed request then returns an empty list."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Posts",
+      "item": [
+        {
+          "name": "Create post (as user B)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  // the body is a JSON-encoded string, e.g. \"9f1c...\"",
+                  "  const postId = pm.response.json();",
+                  "  pm.collectionVariables.set(\"postId\", postId);",
+                  "  pm.test(\"returns a post id\", function () {",
+                  "    pm.expect(postId).to.be.a(\"string\").and.not.be.empty;",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenB}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Hello from Maria\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/post/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "post",
+                "create"
+              ]
+            },
+            "description": "Authenticated (user B). The response body is a JSON-encoded string with the new post id (including the quotes), e.g. \"9f1c8a...\". Blank text gives 400.\n\nCreated as user B so that the feed request (user A) shows it."
+          },
+          "response": []
+        },
+        {
+          "name": "Get post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test(\"returns the post\", function () {",
+                  "    pm.expect(body.id).to.eql(pm.collectionVariables.get(\"postId\"));",
+                  "    pm.expect(body).to.have.property(\"author_user_id\");",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/post/get/{{postId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "post",
+                "get",
+                "{{postId}}"
+              ]
+            },
+            "description": "Public endpoint. Returns {id, text, author_user_id}. Unknown id gives 404."
+          },
+          "response": []
+        },
+        {
+          "name": "Update post (as user B)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenB}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{postId}}\",\n  \"text\": \"Hello from Maria (edited)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/post/update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "post",
+                "update"
+              ]
+            },
+            "description": "Authenticated (user B, the post author). Only the author can update; a non-author or unknown post id gives 400. Empty response body."
+          },
+          "response": []
+        },
+        {
+          "name": "Feed (posts of friends)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const posts = pm.response.json();",
+                  "  const postId = pm.collectionVariables.get(\"postId\");",
+                  "  pm.test(\"feed is a list\", function () {",
+                  "    pm.expect(posts).to.be.an(\"array\");",
+                  "  });",
+                  "  pm.test(\"feed contains user B's post\", function () {",
+                  "    pm.expect(posts.map((p) => p.id)).to.include(postId);",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/post/feed?offset=0&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "post",
+                "feed"
+              ],
+              "query": [
+                {
+                  "key": "offset",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Authenticated (user A). Posts by A's friends, newest first. offset defaults to 0, limit to 10; limit < 1 or offset < 0 gives 400.\n\nRequires \"Add friend (A adds B)\" and \"Create post (as user B)\" to have run first."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete post (as user B)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenB}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/post/delete/{{postId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "post",
+                "delete",
+                "{{postId}}"
+              ]
+            },
+            "description": "Authenticated (user B, the post author). Only the author can delete; a non-author or unknown post id gives 400. Empty response body.\n\nRun this last in the Posts folder — it removes the post the other requests reference."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Dialogs",
+      "item": [
+        {
+          "name": "Send message (A to B)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Hi Maria, this is Ivan\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/dialog/{{userB_id}}/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dialog",
+                "{{userB_id}}",
+                "send"
+              ]
+            },
+            "description": "Authenticated (user A). Empty response body. Unknown recipient gives 400."
+          },
+          "response": []
+        },
+        {
+          "name": "Send message (B to A)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenB}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Hi Ivan!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/dialog/{{userA_id}}/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dialog",
+                "{{userA_id}}",
+                "send"
+              ]
+            },
+            "description": "Authenticated (user B). Empty response body. Unknown recipient gives 400."
+          },
+          "response": []
+        },
+        {
+          "name": "List dialog with user B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const msgs = pm.response.json();",
+                  "  pm.test(\"dialog contains both messages in order\", function () {",
+                  "    pm.expect(msgs.length).to.be.at.least(2);",
+                  "    pm.expect(msgs[0].from).to.eql(pm.collectionVariables.get(\"userA_id\"));",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dialog/{{userB_id}}/list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dialog",
+                "{{userB_id}}",
+                "list"
+              ]
+            },
+            "description": "Authenticated (user A). Returns the conversation between A and B in chronological order as [{from, to, text}]."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Error cases",
+      "description": "Requests that verify the error contract: 400 for invalid input, 401 for missing or unknown tokens, 404 for unknown resources.",
+      "item": [
+        {
+          "name": "Login with wrong password -> 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{userA_id}}\",\n  \"password\": \"wrong-password\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Existing user, wrong password: 400 with an empty body."
+          },
+          "response": []
+        },
+        {
+          "name": "Login for unknown user -> 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 404\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"no-such-user\",\n  \"password\": \"secret-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Unknown user id: 404 with an empty body."
+          },
+          "response": []
+        },
+        {
+          "name": "Register with blank name -> 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"\",\n  \"second_name\": \"Petrov\",\n  \"password\": \"secret-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "register"
+              ]
+            },
+            "description": "Blank first_name (same for blank second_name or password): 400 with an empty body."
+          },
+          "response": []
+        },
+        {
+          "name": "Get unknown user -> 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 404\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/get/no-such-user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "get",
+                "no-such-user"
+              ]
+            },
+            "description": "Unknown user id: 404 with an empty body."
+          },
+          "response": []
+        },
+        {
+          "name": "Search with blank params -> 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/search?first_name=&last_name=Ivanova",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "first_name",
+                  "value": ""
+                },
+                {
+                  "key": "last_name",
+                  "value": "Ivanova"
+                }
+              ]
+            },
+            "description": "Blank first_name: 400 with an empty body. Both query parameters are required."
+          },
+          "response": []
+        },
+        {
+          "name": "Friend yourself -> 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/friend/set/{{userA_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "friend",
+                "set",
+                "{{userA_id}}"
+              ]
+            },
+            "description": "Adding yourself as a friend is rejected with 400 (as is adding an unknown user)."
+          },
+          "response": []
+        },
+        {
+          "name": "Protected endpoint without token -> 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 401\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/post/feed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "post",
+                "feed"
+              ]
+            },
+            "description": "Any protected endpoint without an Authorization header (or with an unknown token) returns 401 with an empty body."
+          },
+          "response": []
+        },
+        {
+          "name": "Feed with negative offset -> 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/post/feed?offset=-1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "post",
+                "feed"
+              ],
+              "query": [
+                {
+                  "key": "offset",
+                  "value": "-1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "offset < 0 or limit < 1 is rejected with 400."
+          },
+          "response": []
+        },
+        {
+          "name": "Create post with blank text -> 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"   \"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/post/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "post",
+                "create"
+              ]
+            },
+            "description": "Whitespace-only post text is rejected with 400."
+          },
+          "response": []
+        },
+        {
+          "name": "Send message to unknown user -> 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"hello?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/dialog/no-such-user/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dialog",
+                "no-such-user",
+                "send"
+              ]
+            },
+            "description": "Unknown recipient: 400 with an empty body."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "description": "Session token of user A. Filled automatically by \"Login as user A\". Used by default on all authenticated requests."
+    },
+    {
+      "key": "tokenB",
+      "value": "",
+      "description": "Session token of user B. Filled automatically by \"Login as user B\"."
+    },
+    {
+      "key": "userA_id",
+      "value": "",
+      "description": "User id of Ivan Petrov. Filled automatically by \"Register user A\"."
+    },
+    {
+      "key": "userB_id",
+      "value": "",
+      "description": "User id of Maria Ivanova. Filled automatically by \"Register user B\"."
+    },
+    {
+      "key": "postId",
+      "value": "",
+      "description": "Id of the post created by user B. Filled automatically by \"Create post (as user B)\"."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: socapp-postgres
+    environment:
+      POSTGRES_DB: socapp
+      POSTGRES_USER: socapp
+      POSTGRES_PASSWORD: socapp
+    ports:
+      - "5432:5432"
+    volumes:
+      - socapp-pgdata:/var/lib/postgresql/data
+
+volumes:
+  socapp-pgdata:
